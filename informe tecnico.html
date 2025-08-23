@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Interactiva del Informe Técnico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals (Slate Gray, Off-White) with Muted Teal Accent -->
+    <!-- Application Structure Plan: A single-page application with top navigation to jump between thematic sections: 'Qué es', 'Características', 'Estructura', and 'Herramientas Gemini'. The core is an interactive diagram of the report structure, where clicking a component reveals its details. This non-linear, interactive approach is chosen over a simple text document to improve user engagement and comprehension by breaking down the information into discoverable, focused chunks. The 'Consejos' section has been removed to streamline the user experience. -->
+    <!-- Visualization & Content Choices: 'Características' -> Interactive Cards (HTML/JS) -> Click to reveal details -> More engaging than a list. 'Estructura' -> Interactive Diagram (HTML/JS) + Donut Chart (Chart.js) -> Click for details, hover on chart for effort breakdown -> Visualizes the report's flow and component weight, aiding understanding. The 'Consejos' section and its accordion has been removed. The new 'Herramientas Gemini' section -> Textarea for input, button to trigger LLM, and a results pane -> Provides a direct, real-world application of the "Clarity and Precision" concept. All choices avoid static text dumps to foster active learning. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: #14b8a6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .nav-button:not(.active):hover {
+            background-color: #f1f5f9;
+            transform: translateY(-2px);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .structure-item {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .structure-item:hover, .structure-item.active {
+            background-color: #ccfbf1;
+            border-left-color: #14b8a6;
+            transform: translateX(4px);
+        }
+        .characteristic-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .characteristic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800 mb-2">Guía Interactiva del Informe Técnico</h1>
+            <p class="text-lg text-slate-600">Una herramienta para dominar la comunicación profesional.</p>
+        </header>
+
+        <nav class="flex justify-center flex-wrap gap-2 md:gap-4 mb-12">
+            <button data-target="que-es" class="nav-button active text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-slate-200">
+                <span>&#128269;</span> ¿Qué es?
+            </button>
+            <button data-target="caracteristicas" class="nav-button text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-slate-200">
+                <span>&#11088;</span> Características
+            </button>
+            <button data-target="estructura" class="nav-button text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-slate-200">
+                <span>&#128220;</span> Estructura
+            </button>
+            <button data-target="herramientas-gemini" class="nav-button text-sm md:text-base font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-slate-200">
+                <span>&#10024;</span> Herramientas
+            </button>
+        </nav>
+
+        <main id="main-content">
+            
+            <section id="que-es" class="content-section active bg-white p-6 md:p-8 rounded-xl shadow-md">
+                <h2 class="text-2xl font-bold text-teal-600 mb-4">¿Qué es un Informe Técnico?</h2>
+                <p class="text-lg leading-relaxed mb-4">
+                    Un informe técnico es un documento formal y estructurado que comunica de manera clara, precisa y objetiva los resultados de una investigación, un proyecto, un estudio o una actividad técnica. Su principal objetivo es proporcionar información validada para facilitar la toma de decisiones.
+                </p>
+                <p class="text-lg leading-relaxed text-slate-700 bg-slate-50 p-4 rounded-lg border-l-4 border-teal-500">
+                    A diferencia de otros tipos de escritos, el informe técnico se centra en los <strong>hechos</strong>, los <strong>datos</strong> y los <strong>hallazgos</strong>, evitando opiniones personales o juicios de valor.
+                </p>
+            </section>
+
+            <section id="caracteristicas" class="content-section">
+                 <h2 class="text-2xl text-center font-bold text-teal-600 mb-8">Características Clave</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="characteristic-card bg-white p-6 rounded-xl shadow-md border-t-4 border-teal-500">
+                        <h3 class="text-xl font-bold mb-2">Objetividad</h3>
+                        <p>Se basa en datos verificables y evidencias, no en suposiciones o interpretaciones personales.</p>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-xl shadow-md border-t-4 border-teal-500">
+                        <h3 class="text-xl font-bold mb-2">Claridad y Precisión</h3>
+                        <p>Utiliza un lenguaje técnico específico pero comprensible para su audiencia, evitando ambigüedades.</p>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-xl shadow-md border-t-4 border-teal-500">
+                        <h3 class="text-xl font-bold mb-2">Coherencia</h3>
+                        <p>El contenido sigue una secuencia lógica y estructurada, donde cada parte se conecta con la siguiente.</p>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-xl shadow-md border-t-4 border-teal-500">
+                        <h3 class="text-xl font-bold mb-2">Verificabilidad</h3>
+                        <p>La información presentada (tablas, gráficos, datos) debe poder ser comprobada por el lector.</p>
+                    </div>
+                    <div class="characteristic-card bg-white p-6 rounded-xl shadow-md border-t-4 border-teal-500">
+                        <h3 class="text-xl font-bold mb-2">Concisión</h3>
+                        <p>Es directo y se enfoca en la información relevante, sin rodeos innecesarios.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="estructura" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-teal-600 mb-2">Anatomía de un Informe Técnico</h2>
+                    <p class="text-slate-600">Haz clic en cada componente para explorar sus detalles.</p>
+                </div>
+                <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+                    <div class="lg:col-span-1 mb-8 lg:mb-0">
+                        <div id="structure-list" class="space-y-2">
+                        </div>
+                    </div>
+                    <div id="structure-details" class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md min-h-[300px]">
+                    </div>
+                </div>
+                <div class="mt-12 bg-white p-6 md:p-8 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold text-center text-teal-600 mb-4">Visualización de la Estructura</h3>
+                    <p class="text-center text-slate-600 mb-6">Este gráfico representa una estimación del peso o esfuerzo que cada sección principal suele tener dentro del informe completo.</p>
+                    <div class="chart-container">
+                        <canvas id="structureChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="herramientas-gemini" class="content-section bg-white p-6 md:p-8 rounded-xl shadow-md">
+                <h2 class="text-2xl text-center font-bold text-teal-600 mb-4">Herramientas Gemini ✨</h2>
+                <p class="text-lg text-center text-slate-600 mb-8">Utiliza esta herramienta para mejorar tus textos, haciéndolos más claros, precisos y objetivos, tal como exige un informe técnico.</p>
+
+                <div class="max-w-3xl mx-auto">
+                    <label for="text-input" class="block text-slate-700 font-semibold mb-2">Ingresa el texto a revisar:</label>
+                    <textarea id="text-input" rows="8" class="w-full p-3 rounded-lg border-2 border-slate-200 focus:outline-none focus:border-teal-500 transition-colors mb-4" placeholder="Ejemplo: 'La empresa está en un momento de incertidumbre debido a la volatilidad del mercado, lo que podría llevar a una disminución de las ganancias.'"></textarea>
+                    
+                    <button id="improve-text-btn" class="w-full flex justify-center items-center py-3 px-6 rounded-full bg-teal-600 text-white font-bold text-lg shadow-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="button-text">Revisar Texto ✨</span>
+                        <span id="loading-spinner" class="hidden animate-spin ml-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                    </button>
+
+                    <div id="result-container" class="mt-8 bg-slate-50 p-6 rounded-lg border-l-4 border-teal-500">
+                        <p id="result-text" class="text-lg leading-relaxed text-slate-700">El texto mejorado aparecerá aquí.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navButtons = document.querySelectorAll('.nav-button');
+            const contentSections = document.querySelectorAll('.content-section');
+            const structureListContainer = document.getElementById('structure-list');
+            const structureDetailsContainer = document.getElementById('structure-details');
+            const improveTextBtn = document.getElementById('improve-text-btn');
+            const textInput = document.getElementById('text-input');
+            const resultText = document.getElementById('result-text');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const buttonText = document.getElementById('button-text');
+
+            const structureData = [
+                { id: 'portada', title: 'Portada', content: 'Es la primera página. Incluye el <strong>título del informe</strong> (claro y descriptivo), el <strong>autor(es)</strong>, la <strong>fecha</strong> de elaboración y la <strong>organización</strong> o institución.<img src="https://imgv2-1-f.scribdassets.com/img/document/468485538/original/44600542ac/1?v=1" alt="Descripción de la imagen">' },
+                { id: 'indice', title: 'Índice o Tabla de Contenido', content: 'Organiza los títulos y subtítulos con sus respectivos números de página. Es esencial para informes largos, ya que facilita la navegación y la localización de información específica.<img src="https://cdn.prod.website-files.com/6503c5066b5dac33a4cbd740/6709842c0442b15a6ea23062_65d5668864bea140c05a0a11_como-hacer-indice.png" alt="Descripción de la imagen">' },
+                { id: 'resumen', title: 'Resumen (Abstract)', content: 'Una breve pero completa descripción de todo el informe. Debe incluir el objetivo, la metodología, los resultados principales y las conclusiones más importantes. A menudo es la última parte en escribirse.<img src="nombre_de_la_imagen.jpg" alt="Descripción de la imagen">' },
+                { id: 'introduccion', title: 'Introducción', content: 'Presenta el tema del informe, establece el <strong>objetivo</strong> principal del estudio, describe el <strong>alcance</strong> (qué se incluyó y qué no) y menciona la <strong>metodología</strong> utilizada.<img src="nombre_de_la_imagen.jpg" alt="Descripción de la imagen">' },
+                { id: 'cuerpo', title: 'Cuerpo del Informe', content: 'Es la sección principal donde se desarrolla todo el contenido. Generalmente se divide en: <ul class="list-disc pl-5 mt-2 space-y-1"><li><strong>Marco Teórico:</strong> Fundamenta el informe con conceptos y teorías.</li><li><strong>Desarrollo:</strong> Describe en detalle el problema analizado o el proyecto realizado.</li><li><strong>Análisis y Resultados:</strong> Presenta los datos obtenidos de forma organizada, usando gráficos y tablas.</li></ul><img src="nombre_de_la_imagen.jpg" alt="Descripción de la imagen">' },
+                { id: 'conclusiones', title: 'Conclusiones', content: 'Aquí se responden directamente los objetivos planteados en la introducción. Se resumen los hallazgos más relevantes del estudio. Es importante no introducir información nueva en esta sección.<img src="nombre_de_la_imagen.jpg" alt="Descripción de la imagen">' },
+                { id: 'recomendaciones', title: 'Recomendaciones (Opcional)', content: 'Si el objetivo del informe lo permite, en esta sección se sugieren acciones, mejoras o soluciones basadas en las conclusiones obtenidas. Deben ser prácticas y realizables.<img src="nombre_de_la_imagen.jpg" alt="Descripción de la imagen">' },
+                { id: 'anexos', title: 'Anexos y Apéndices', content: 'Contiene información adicional que no es crucial para la lectura principal pero que es útil como referencia. Ejemplos: datos brutos, transcripciones de encuestas, planos, fotografías, etc.<img src="nombre_de_la_imagen.jpg" alt="Descripción de la imagen">' }
+            ];
+
+            function switchTab(targetId) {
+                navButtons.forEach(button => {
+                    button.classList.toggle('active', button.dataset.target === targetId);
+                });
+                contentSections.forEach(section => {
+                    section.classList.toggle('active', section.id === targetId);
+                });
+            }
+            
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    switchTab(button.dataset.target);
+                });
+            });
+
+            function renderStructureList() {
+                structureData.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'structure-item border-l-4 border-slate-200 p-3 bg-slate-50 rounded-r-lg';
+                    div.dataset.id = item.id;
+                    div.innerHTML = `<h4 class="font-semibold text-slate-700">${item.title}</h4>`;
+                    structureListContainer.appendChild(div);
+                });
+            }
+
+            function showStructureDetails(itemId) {
+                const itemData = structureData.find(item => item.id === itemId);
+                if (itemData) {
+                    structureDetailsContainer.innerHTML = `
+                        <h3 class="text-2xl font-bold text-teal-600 mb-4">${itemData.title}</h3>
+                        <div class="text-lg leading-relaxed space-y-3">${itemData.content}</div>
+                    `;
+                    document.querySelectorAll('.structure-item').forEach(el => {
+                        el.classList.toggle('active', el.dataset.id === itemId);
+                    });
+                }
+            }
+
+            if (structureListContainer) {
+                renderStructureList();
+                structureListContainer.addEventListener('click', (e) => {
+                    const itemElement = e.target.closest('.structure-item');
+                    if (itemElement) {
+                        showStructureDetails(itemElement.dataset.id);
+                    }
+                });
+                showStructureDetails('portada');
+            }
+
+            const ctx = document.getElementById('structureChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Introducción', 'Cuerpo del Informe', 'Conclusiones y Resumen', 'Formato y Anexos'],
+                        datasets: [{
+                            label: 'Peso en el Informe',
+                            data: [15, 60, 15, 10],
+                            backgroundColor: [
+                                'rgba(20, 184, 166, 0.7)',
+                                'rgba(15, 118, 110, 0.8)',
+                                'rgba(14, 165, 233, 0.7)',
+                                'rgba(100, 116, 139, 0.6)'
+                            ],
+                            borderColor: [
+                                'rgb(20, 184, 166)',
+                                'rgb(15, 118, 110)',
+                                'rgb(14, 165, 233)',
+                                'rgb(100, 116, 139)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + '%';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            improveTextBtn.addEventListener('click', async () => {
+                const text = textInput.value.trim();
+                if (text === '') {
+                    resultText.innerHTML = 'Por favor, ingresa un texto para revisar.';
+                    return;
+                }
+
+                improveTextBtn.disabled = true;
+                loadingSpinner.classList.remove('hidden');
+                buttonText.textContent = '';
+                resultText.innerHTML = 'Revisando texto...';
+
+                const prompt = `Actúa como un editor experto en redacción de informes técnicos. Tu tarea es tomar el siguiente texto y mejorarlo para que sea más claro, preciso y objetivo. Evita opiniones o suposiciones. Solo devuelve el texto mejorado, sin comentarios adicionales.
+
+Texto a mejorar: "${text}"`;
+                
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                try {
+                    let response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const improvedText = result.candidates[0].content.parts[0].text;
+                        resultText.textContent = improvedText;
+                    } else {
+                        resultText.textContent = 'No se pudo obtener una respuesta. Intenta de nuevo.';
+                    }
+                } catch (error) {
+                    resultText.textContent = 'Hubo un error al procesar la solicitud. Por favor, inténtalo de nuevo más tarde.';
+                    console.error('Error en la llamada a la API:', error);
+                } finally {
+                    improveTextBtn.disabled = false;
+                    loadingSpinner.classList.add('hidden');
+                    buttonText.textContent = 'Revisar Texto ✨';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
